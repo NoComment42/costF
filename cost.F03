@@ -90,7 +90,10 @@ end interface
 
 
 !   set conversion factors
-    convert = 1.0
+    convert(1) = 1e1
+    convert(2) = 1e3
+    convert(3) = 1e0
+    convert(4) = 1e0
 
 !   set diff to zero
     diff = 0.0
@@ -242,14 +245,14 @@ end interface
 
 !   set constraints up
     allocate( constraints(nTerms) )
-    constraints(1) = Constraint("equal","generalized_exp",[.5,-0.75,0.])
-    constraints(2) = Constraint("equal","generalized_exp",[0.01,-3.,0.])
-    constraints(3) = Constraint("equal","generalized_exp",[0.5,-1.,expR(1)])
-    constraints(4) = Constraint("equal","generalized_exp",[0.5,-1.,expR(2)])
-    err = constraints(1)%printConstraint(OUTDIR//"/cp_constraint.dat",100)
+    constraints(1) = Constraint("equal","generalized_exp",[0.5,-2.0,0.])
+    constraints(2) = Constraint("equal","generalized_exp",[0.5,-2.0,0.])
+    constraints(3) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(1)])
+    constraints(4) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(2)])
+    err = constraints(1)%printConstraint(OUTDIR//"/cp_constraint.dat",500)
     err = constraints(2)%printConstraint(OUTDIR//"/cf_constraint.dat",500)
-    err = constraints(3)%printConstraint(OUTDIR//"/sep_constraint.dat",100)
-    err = constraints(4)%printConstraint(OUTDIR//"/attach_constraint.dat",100)
+    err = constraints(3)%printConstraint(OUTDIR//"/sep_constraint.dat",500)
+    err = constraints(4)%printConstraint(OUTDIR//"/attach_constraint.dat",500)
 
     numRoots = min(size(expR),size(simR))
     do i=1,numRoots
@@ -261,6 +264,7 @@ end interface
     cost = 0.0
     do i=1,nTerms
         write(22,'("Diff: ",2(ES15.7,X))') diff(i), convert(i)*diff(i)
+        diff(i) = convert(i)*diff(i)
         cost = cost + diff(i)
     end do
 
@@ -273,9 +277,13 @@ end interface
     write(22,*) 
     write(22,*) 
     write(22,*) 
+    cost = 0.0
     do i=1,nTerms
         write(22,*) constraints(i)%eval(diff(i))
+        cost = cost + constraints(i)%eval(diff(i))
     end do
+
+    write(22,'("Cost Function: ",ES15.7)') cost
 
     close(22)
 

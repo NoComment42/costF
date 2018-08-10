@@ -1,9 +1,9 @@
 clear;clc;
 
-data = load("cp.dat");
-data2 = load("cf.dat");
-data3 = load("sep.dat");
-data4 = load("attach.dat");
+data = load("../PRINTFILES/cp_constraint.dat");
+data2 = load("../PRINTFILES/cf_constraint.dat");
+data3 = load("../PRINTFILES/sep_constraint.dat");
+data4 = load("../PRINTFILES/attach_constraint.dat");
 
 subplot(2,2,1);
 plot(data(:,1),data(:,2));
