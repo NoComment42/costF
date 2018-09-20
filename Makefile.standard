@@ -6,9 +6,13 @@ CONDIR=Constraints
 
 export FORT=gfortran
 export FLAGS= -cpp -fdefault-real-8 -O3 -fbacktrace -Wall -fcheck=all \
-       -ffree-line-length-0
-HOME= $(shell pwd)
-PREPROC= -D'EXPDIR="$(HOME)/EXP"' -D'SIMDIR="."' -D'OUTDIR="$(HOME)/PRINTFILES"'
+				  -ffree-line-length-0
+HOME=$(shell pwd)
+PREPROC= -D'EXPDIR="$(HOME)/EXP"' -D'SIMDIR="."' \
+         -D'OUTDIR="$(HOME)/PRINTFILES"'
+
+#PREPROC= -D'EXPDIR="EXP"' -D'SIMDIR="SIM"' \
+#         -D'OUTDIR="PRINTFILES"'
 
 %.o %.mod : %.F03
 	$(FORT) $(FLAGS) $(PREPROC) -c $< -o $@

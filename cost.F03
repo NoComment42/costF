@@ -287,6 +287,8 @@ end interface
 
     close(22)
 
+    write(*,*) cost
+
 end program test
 
 subroutine readFile(fname,xpts,ypts,xcol,ycol)
