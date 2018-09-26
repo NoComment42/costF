@@ -4,7 +4,7 @@ module class_constraints
 implicit none
 
 type Constraint
-        Character(len=120), private :: constraintLabel
+        Character(len=120), private :: constraint_label
         Character(len=120), private :: constraint_type
         Character(len=120), private :: function_type
         procedure(gen_func), pointer, private :: func
@@ -14,6 +14,7 @@ type Constraint
         Character(len=10), allocatable, dimension(:), private :: pLabels
     
     contains
+        procedure, public :: getConstraintLabel
         procedure, public :: getConstraintType
         procedure, public :: getFunctionType
         procedure, public :: getNParams
@@ -54,29 +55,38 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Constructors
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    type(Constraint) function constructor (c_type,f_type,params)
+    type(Constraint) function constructor (c_type,f_type,params,label)
     implicit none
         Character(len=*), intent(in) :: c_type, f_type
+        Character(len=*), optional :: label
         real, dimension(:) :: params
+        Character(len=120) :: tlabel
+  
+        if ( present(label) ) then
+            tlabel = label
+        else
+            tlabel = "Not Labeled"
+        end if
 
         select case(trim(c_type))
             case("equal")
-                call constructor%init_equal(c_type,f_type,params)
+                call constructor%init_equal(c_type,f_type,params,tlabel)
             case DEFAULT
                 write(*,*) "Not a recognized constraint"
         end select
     end function constructor
 
 
-    subroutine init_equal (this,c_type,f_type,params)
+    subroutine init_equal (this,c_type,f_type,params,label)
     implicit none
         class(Constraint) :: this
-        Character(len=*), intent(in) :: c_type, f_type
+        Character(len=*), intent(in) :: c_type, f_type, label
         real, dimension(:) :: params
 
+        this%constraint_label = label
         this%constraint_type = c_type
         this%function_type = f_type
-
+        
         select case(trim(f_type))
             case("generalized_exp")
                 this%func => generalized_exp
@@ -95,6 +105,13 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Output functions
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    function getConstraintLabel (this) result(answer)
+    implicit none
+        class(Constraint), intent(in) :: this
+        Character(len=120) :: answer
+        answer = this%constraint_label
+    end function getConstraintLabel
+
     function getConstraintType (this) result(answer)
     implicit none
         class(Constraint), intent(in) :: this

@@ -13,8 +13,9 @@ implicit none
     inp(2) = -2.0
     inp(3) = 1.0
     c1 = Constraint("equal","generalized_exp",inp)
-    write(*,*) "constraint type : ", trim(c1%getConstraintType())
-    write(*,*) "function used   : ", trim(c1%getFunctionType())
+    write(*,*) "constraint label : ", trim(c1%getConstraintLabel())
+    write(*,*) "constraint type  : ", trim(c1%getConstraintType())
+    write(*,*) "function used    : ", trim(c1%getFunctionType())
     write(*,*)
 
     nParams = c1%getNParams()
@@ -31,9 +32,10 @@ implicit none
     write(*,*)
     write(*,*)
 
-    c2 = Constraint("equal","inverse_poly",inp)
-    write(*,*) "constraint type : ", trim(c2%getConstraintType())
-    write(*,*) "function used   : ", trim(c2%getFunctionType())
+    c2 = Constraint("equal","inverse_poly",inp,"Second Constraint")
+    write(*,*) "constraint label : ", trim(c2%getConstraintLabel())
+    write(*,*) "constraint type  : ", trim(c2%getConstraintType())
+    write(*,*) "function used    : ", trim(c2%getFunctionType())
     write(*,*)
 
     nParams = c2%getNParams()

@@ -187,11 +187,19 @@ end interface
     write(22,*)
     write(22,*) 'Get Cp difference'
     call calcDiff(cpfunc,cpexp,diff(1))
+    ! if the diff calculation fails for some reason it will return -1.0
+    ! so set to a value that will set the constraint to an extrema
+    if ( diff(1) == -1.0 ) then
+        diff(1) = -10.0
+    end if
+
 
     write(22,*)
     write(22,*) 'Get Cf difference'
     call calcDiff(cffunc,cfexp,diff(2))
-
+    if ( diff(2) == -1.0 ) then
+        diff(2) = -10.0
+    end if
 
 
     !di = resolution*size(pts,1)
@@ -245,10 +253,10 @@ end interface
 
 !   set constraints up
     allocate( constraints(nTerms) )
-    constraints(1) = Constraint("equal","generalized_exp",[0.5,-2.0,0.])
-    constraints(2) = Constraint("equal","generalized_exp",[0.5,-2.0,0.])
-    constraints(3) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(1)])
-    constraints(4) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(2)])
+    constraints(1) = Constraint("equal","generalized_exp",[0.5,-2.0,0.],"cp")
+    constraints(2) = Constraint("equal","generalized_exp",[0.5,-2.0,0.],"cf")
+    constraints(3) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(1)],"separation")
+    constraints(4) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(2)],"attachment")
     err = constraints(1)%printConstraint(OUTDIR//"/cp_constraint.dat",500)
     err = constraints(2)%printConstraint(OUTDIR//"/cf_constraint.dat",500)
     err = constraints(3)%printConstraint(OUTDIR//"/sep_constraint.dat",500)
@@ -279,9 +287,13 @@ end interface
     write(22,*) 
     cost = 0.0
     do i=1,nTerms
-        write(22,*) constraints(i)%eval(diff(i))
+        write(22,1001) trim(constraints(i)%getConstraintLabel()), &
+                      constraints(i)%eval(diff(i))
+
         cost = cost + constraints(i)%eval(diff(i))
     end do
+1001 format  (A10, ES15.7)
+
 
     write(22,'("Cost Function: ",ES15.7)') cost
 
@@ -485,6 +497,8 @@ implicit none
     type(pwLinear), intent(in) :: func1, func2
     real, intent(inout) :: diff
 
+    integer, parameter :: FTOL = 50
+
     integer :: nl, error
     logical :: run
 
@@ -502,8 +516,15 @@ implicit none
             run = .FALSE.
         else
             nl = nl + 2
-            write(22,'("Changed failure levels to ",I3)') nl
-            call setELevel(nl)
+            if ( nl > FTOL ) then
+                write(22,'("Failure level reached ",I4)')
+                write(22,'("so exiting with a complete fail.")')
+                diff = -1.0
+                exit
+            else
+                write(22,'("Changed failure levels to ",I4)') nl
+                call setELevel(nl)
+            end if
         end if
     end do
 
