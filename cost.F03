@@ -299,7 +299,9 @@ end interface
 
     close(22)
 
-    write(*,*) cost
+    write(*,1002) cost, (constraints(i)%eval(diff(i)), i=1,nTerms) 
+
+1002 format (5(ES15.7,X))
 
 end program test
 
