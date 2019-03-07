@@ -9,6 +9,7 @@ export FLAGS= -cpp -fdefault-real-8 -O3 -fbacktrace -Wall -fcheck=all \
        -ffree-line-length-0
 HOME= $(shell pwd)
 PREPROC= -D'EXPDIR="$(HOME)/EXP"' -D'SIMDIR="."' -D'OUTDIR="$(HOME)/PRINTFILES"'
+PREPROC += -D'DEBUG=1'
 
 %.o %.mod : %.F03
 	$(FORT) $(FLAGS) $(PREPROC) -c $< -o $@

@@ -3,6 +3,12 @@ use bisection
 use class_constraints
 implicit none
 
+
+! Do we want output files or no?
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 interface
     subroutine readFile(fname,xpts,ypts,xcol,ycol)
     implicit none
@@ -69,15 +75,18 @@ end interface
 
 !   constraints
     type(Constraint), allocatable, dimension(:) :: constraints
-    integer :: err
 
 !   general counters
     integer :: i
 
 !   for file reading
     integer :: xcol, ycol
-    character(len=120) :: fname, tag
     character(len=120) :: pathCpExp, pathCfExp, pathCpSim, pathCfSim
+
+#if DEBUG <= 0
+    integer :: err
+    character(len=120) :: fname, tag
+#endif
  
 !   roots
     integer :: numRoots
@@ -120,6 +129,7 @@ end interface
 #define OUTDIR "."
 #endif
     write(22,*) 'Using OUTDIR: '//OUTDIR
+    write(22,*) 'If DEBUG is > 0, this will not be used'
 
 !   Cp from experiment
     write(22,*) 'Read experiment Cp'
@@ -129,9 +139,11 @@ end interface
 
     cpexp = pwLinear(pts,ypts=ypts)
 
+#if DEBUG <= 0
     fname = OUTDIR // '/cp_exp.curve'
     tag = '# Cp Exp'
     call printCurve( fname, tag, cpexp, resolution )
+#endif
 
 !   Cf from experiment
     write(22,*) 'Read experiment Cf'
@@ -141,9 +153,11 @@ end interface
 
     cfexp = pwLinear(pts,ypts=ypts)
 
+#if DEBUG <= 0
     fname = OUTDIR // '/cf_exp.curve'
     tag = '# Cf Exp'
     call printCurve( fname, tag, cfexp, resolution )
+#endif
 
 
 !   Cp from simulation
@@ -157,9 +171,11 @@ end interface
 
     cpfunc = pwLinear(pts,ypts=ypts)
 
+#if DEBUG <= 0
     fname = OUTDIR // '/cp_sim.curve'
     tag = '# Cp Simulation'
     call printCurve( fname, tag, cpfunc, resolution )
+#endif
 
 !   Cf from experiment
     write(22,*) 'Read simulation Cf'
@@ -169,9 +185,11 @@ end interface
 
     cffunc = pwLinear(pts,ypts=ypts)
 
+#if DEBUG <= 0
     fname = OUTDIR // '/cf_sim.curve'
     tag = '# Cf Simulation'
     call printCurve( fname, tag, cffunc, resolution )
+#endif
 
     write(22,*) "set a zero'd function"
 
@@ -257,10 +275,13 @@ end interface
     constraints(2) = Constraint("equal","generalized_exp",[0.5,-2.0,0.],"cf")
     constraints(3) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(1)],"separation")
     constraints(4) = Constraint("equal","generalized_exp",[0.5,-1.0,expR(2)],"attachment")
+
+#if DEBUG <= 0
     err = constraints(1)%printConstraint(OUTDIR//"/cp_constraint.dat",500)
     err = constraints(2)%printConstraint(OUTDIR//"/cf_constraint.dat",500)
     err = constraints(3)%printConstraint(OUTDIR//"/sep_constraint.dat",500)
     err = constraints(4)%printConstraint(OUTDIR//"/attach_constraint.dat",500)
+#endif
 
     numRoots = min(size(expR),size(simR))
     do i=1,numRoots
